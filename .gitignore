@@ -1,0 +1,12 @@
+/PEQCake/
+/PEQCakebuenasdaasd.zip
+/sqlite-backup-from-zip.sqlite
+/nul
+/.git-nested-backups/
+/.atl/
+**/nul
+**/vendor/
+**/.env
+**/.env.production
+**/serve.log
+**/.phpunit.result.cache

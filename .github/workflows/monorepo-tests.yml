@@ -1,0 +1,95 @@
+name: Monorepo App Tests
+
+on:
+  push:
+    branches:
+      - master
+      - main
+    paths:
+      - 'apps/public/**'
+      - 'apps/admin/**'
+      - '.github/workflows/monorepo-tests.yml'
+  pull_request:
+    paths:
+      - 'apps/public/**'
+      - 'apps/admin/**'
+      - '.github/workflows/monorepo-tests.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      public: ${{ steps.filter.outputs.public }}
+      admin: ${{ steps.filter.outputs.admin }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Detect changed apps
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            public:
+              - 'apps/public/**'
+              - '.github/workflows/monorepo-tests.yml'
+            admin:
+              - 'apps/admin/**'
+              - '.github/workflows/monorepo-tests.yml'
+
+  public-tests:
+    needs: changes
+    if: needs.changes.outputs.public == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
+          coverage: none
+
+      - name: Install Composer dependencies (public)
+        working-directory: apps/public
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Prepare environment (public)
+        working-directory: apps/public
+        run: cp .env.example .env && php artisan key:generate
+
+      - name: Execute tests (public)
+        working-directory: apps/public
+        run: vendor/bin/phpunit
+
+  admin-tests:
+    needs: changes
+    if: needs.changes.outputs.admin == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
+          coverage: none
+
+      - name: Install Composer dependencies (admin)
+        working-directory: apps/admin
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Prepare environment (admin)
+        working-directory: apps/admin
+        run: cp .env.example .env && php artisan key:generate
+
+      - name: Execute tests (admin)
+        working-directory: apps/admin
+        run: vendor/bin/phpunit
