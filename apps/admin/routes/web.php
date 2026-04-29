@@ -27,6 +27,13 @@ Route::match(['GET', 'POST'], '/login', function () {
     abort(404);
 });
 
+Route::prefix('legal')->name('legal.')->group(function (): void {
+    Route::view('/aviso-legal', 'legal.aviso-legal')->name('aviso-legal');
+    Route::view('/privacidad', 'legal.privacidad')->name('privacidad');
+    Route::view('/cookies', 'legal.cookies')->name('cookies');
+    Route::view('/terminos-condiciones-compra', 'legal.terminos-condiciones-compra')->name('terminos-condiciones-compra');
+});
+
 Route::middleware('auth')->group(function () use ($adminPath, $legacyAdminPath): void {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
